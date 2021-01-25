@@ -1,0 +1,99 @@
+tinymce.PluginManager.add('desmos', function(editor, url) {
+  // Add a button that opens a window
+  myTempCanvas = document.createElement("canvas");
+        myTempCanvas.id = "ChartJsTemp";
+	//myTempCanvas.width = 300;
+	//myTempCanvas.height = 300;
+	//myTempCanvas.style.display = "none";
+	document.body.appendChild(myTempCanvas);
+        var calcElt = document.getElementById('ChartJsTemp');
+        var calculator = Desmos.GraphingCalculator(calcElt);
+        
+  editor.addButton('desmos', {
+    text: 'My button',
+    icon: false,
+    onclick: function() {
+      // Open window
+      editor.windowManager.open({
+        title: 'Example plugin',
+        body: [
+            {type: 'container', name: 'blah', label: 'ff', html: document.getElementById('ChartJsTemp').innerHTML},
+          {type: 'textbox', name: 'formula', label: 'Formula'}
+        ],
+        onsubmit: function(e) {
+          // Insert content when the window form is submitted
+          createChart(e);
+          //editor.insertContent('Title: ' + e.data.title);
+        }
+      });
+    }
+  });
+
+  // Adds a menu item to the tools menu
+  editor.addMenuItem('desmos', {
+    text: 'Example plugin',
+    context: 'tools',
+    onclick: function() {
+      // Open window with a specific url
+      editor.windowManager.open({
+        title: 'TinyMCE site',
+        type: "container",
+        html: document.getElementById('ChartJsTemp').innerHTML,
+        //url: 'https://www.ampil.co.uk',
+        width: 800,
+        height: 600,
+        buttons: [{
+          text: 'Close',
+          onclick: 'close'
+        }]
+      });
+    }
+  });
+
+  return {
+    getMetadata: function () {
+      return  {
+        name: "Example plugin",
+        url: "http://exampleplugindocsurl.com"
+      };
+    }
+  };
+  
+  
+  function createChart(e){
+      //create temporary canvas with fixed width and height and hide
+        //formula from user input
+        formula = e.data.formula;
+        calculator.setExpression({latex: formula});
+      console.log(e.data.formula);
+      //logs correctly on console
+        TempImage = document.createElement("img");
+        TempImage.id = "image"
+        //problem here
+        TempImage.src = calculator.asyncScreenshot({
+            //latex: 'y=x',
+            height: 300,
+            width: 300,
+            targetPixelRatio: 2
+        },
+        setImageSrc
+                );
+        myTempCanvas2 = document.createElement("div");
+        myTempCanvas2.id = "ChartJsTemp2";
+	myTempCanvas2.width = 300;
+	myTempCanvas2.height = 300;
+        insertImage = document.getElementById("image")
+	myTempCanvas2.style.display = "none";
+	document.body.appendChild(myTempCanvas2);
+        document.getElementById("ChartJsTemp2").appendChild(TempImage);
+        //editor.insertContent("<img src=\"" + url + "\" width=\"" + canvasWidth + "\" height=\"" + canvasHeight + "\"  alt=\"" + myTempSrcData +  "\">");
+        editor.insertContent("<img src=\""+insertImage.src+"\">");
+  }
+  
+  function setImageSrc(data) {
+  var img = document.getElementById('image');
+  img.src = data;
+}
+  
+});
+
